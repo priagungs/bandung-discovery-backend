@@ -11,7 +11,7 @@ const authCheck = async (req, res, next) => {
       let decoded = await jwt.verify(token, config.secret);
       console.log(token);
       console.log(decoded);
-      res.locals.id_user = decoded.id;
+      res.locals.id = decoded.id;
       next();
     } catch (error) {
       res.send(401);

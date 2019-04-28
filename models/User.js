@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   email: {type: String, index: true, unique: true},
   password: String,
   type: String,
+  numVoucher: Number,
   vouchers: [{type: mongoose.Schema.Types.ObjectId, ref: 'Voucher'}]
 });
 
