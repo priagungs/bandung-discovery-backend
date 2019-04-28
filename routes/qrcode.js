@@ -24,14 +24,14 @@ router.get('/manager', async (req, res) => {
 router.get('/tourist/:idVoucher', async (req, res) => {
   try {
     let user = await User.findById(res.locals.id);
-    let idVoucher = req.param.idVoucher;
-
-    if (user.type !== 'tourist' && user.vouchers.) {
+    let idVoucher = req.params.idVoucher;
+    console.log("USER\n" + user);
+    if (user.type !== 'tourist' && !user.vouchers.includes(idVoucher)) {
       return res.status(403).send({success: false, data: null});
     }
 
     console.log(idVoucher);
-    let url = await QRCode.toDataURL(idVoucher.toString());
+    let url = await QRCode.toDataURL(idVoucher);
     console.log(url);
     res.send({success: true, data: url}); 
   } catch (error) {
