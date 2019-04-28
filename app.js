@@ -8,6 +8,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 const voucherRouter = require('./routes/voucher');
+const qrRouter = require('./routes/qrcode');
 const destinationRouter = require('./routes/destination');
 const authMiddleware = require('./middleware/middleware');
 
@@ -26,6 +27,7 @@ app.use('/users',authMiddleware.authCheck, usersRouter);
 app.use('/auth', authRouter);
 app.use('/voucher', authMiddleware.authCheck, voucherRouter);
 app.use('/destination', authMiddleware.authCheck, destinationRouter);
+app.use('/qrcode', authMiddleware.authCheck, qrRouter);
 
 app.listen(3000, () => {
   console.log('Running on port 3000');

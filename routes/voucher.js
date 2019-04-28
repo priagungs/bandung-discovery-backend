@@ -1,18 +1,17 @@
 const router = require('express').Router();
 const moment = require('moment');
-const QRCode = require('qrcode')
+const QRCode = require('qrcode');
 
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 
 
-router.post('/:idVoucher', async (req, res) => {
+router.post('/:idVoucher/:idUser', async (req, res) => {
   try {
-    let user = await User.findById(res.locals.id);
+    let user = await User.findById(req.params.idUser);
     if (!user) {
       throw "User not found";
     }
-    console.log(res.locals.id);
     user.vouchers.push(req.params.idVoucher);
     console.log(user);
     user.save();
@@ -37,9 +36,14 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/:idUser', async (req, res) => {
   try {
-    let vouchers = await Voucher.find();
+    let user = await User.findById(req.params.idUser);
+    let vouchers = [];
+    user.vouchers.forEach(async element => {
+      let voucher = await Voucher.findById(element);
+      vouchers.push(voucher);
+    });
     res.status(200).send({success: true, data: vouchers});
   } catch (err) {
     console.log(err);
@@ -47,11 +51,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.delete('/:idVoucher', async (req, res) => {
+router.delete('/:idVoucher/:idUser', async (req, res) => {
   try {
     let idVoucher = req.params.idVoucher;
-    let user = await User.findById(res.locals.id);
-    if (!user) {
+    let user = await User.findById(req.params.idUser);
+    if (!user || user.type === 'manager') {
       throw "User not found";
     }
     console.log(user);
@@ -65,46 +69,18 @@ router.delete('/:idVoucher', async (req, res) => {
   }
 });
 
-router.get('/qrcode', async (req, res) => {
+router.put('/decrement/:idUser', async (req, res) => {
   try {
-    let user = await User.findById(res.locals.id);
-    if (user.type !== 'manager') {
-      return res.status(403).send({success: false, data: null});
-    }
-
+    let user = await User.findById(req.params.idUser);
     user.numVoucher--;
-    await user.save();
-
-    let vouchers = await Voucher.find();
-    let voucherId = vouchers.map(voucher => voucher._id)[Math.floor(Math.random() * vouchers.length)];
-    console.log(voucherId);
-    let url = await QRCode.toDataURL(voucherId.toString());
-    console.log(url);
-    res.send({success: true, data: url}); 
+    user = await user.save();
+    res.send({success: true, data: user});
   } catch (error) {
     console.log(error);
     res.status(500).send({success: false, data: null});
   }
 });
 
-router.get('/qrcode/:idVoucher', async (req, res) => {
-  try {
-    let user = await User.findById(res.locals.id);
-    if (user.type !== 'tourist') {
-      return res.status(403).send({success: false, data: null});
-    }
-    let idVoucher = req.param.idVoucher;
-    user.vouchers.splice(user.vouchers.indexOf(idVoucher), 1);
-    await user.save();
 
-    console.log(idVoucher);
-    let url = await QRCode.toDataURL(idVoucher.toString());
-    console.log(url);
-    res.send({success: true, data: url}); 
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({success: false, data: null});
-  }
-});
 
 module.exports = router;
