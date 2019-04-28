@@ -5,6 +5,18 @@ const QRCode = require('qrcode');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 
+router.put('/decrement/:idUser', async (req, res) => {
+  try {
+    let user = await User.findById(req.params.idUser);
+    console.log(user);
+    user.numVoucher--;
+    user = await user.save();
+    res.send({success: true, data: user});
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({success: false, data: null});
+  }
+});
 
 router.post('/:idVoucher/:idUser', async (req, res) => {
   try {
@@ -40,10 +52,10 @@ router.get('/:idUser', async (req, res) => {
   try {
     let user = await User.findById(req.params.idUser);
     let vouchers = [];
-    user.vouchers.forEach(async element => {
-      let voucher = await Voucher.findById(element);
+    for (const voucherId of user.vouchers) {
+      let voucher = await Voucher.findById(voucherId);
       vouchers.push(voucher);
-    });
+    }
     res.status(200).send({success: true, data: vouchers});
   } catch (err) {
     console.log(err);
@@ -69,17 +81,7 @@ router.delete('/:idVoucher/:idUser', async (req, res) => {
   }
 });
 
-router.put('/decrement/:idUser', async (req, res) => {
-  try {
-    let user = await User.findById(req.params.idUser);
-    user.numVoucher--;
-    user = await user.save();
-    res.send({success: true, data: user});
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({success: false, data: null});
-  }
-});
+
 
 
 
